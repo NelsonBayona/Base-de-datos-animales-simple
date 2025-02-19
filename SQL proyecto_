@@ -1,0 +1,181 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema bio
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema bio
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `bio` DEFAULT CHARACTER SET utf8 ;
+USE `bio` ;
+
+-- -----------------------------------------------------
+-- Table `bio`.`Ecosistema`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `bio`.`Ecosistema` (
+  `id_habitat` INT NOT NULL AUTO_INCREMENT,
+  `ubicacion_geografica` VARCHAR(100) NOT NULL,
+  `clima` VARCHAR(60) NOT NULL,
+  `tipo_ecosisitema` VARCHAR(80) NOT NULL,
+  PRIMARY KEY (`id_habitat`),
+  UNIQUE INDEX `clima_UNIQUE` (`clima` ASC) VISIBLE,
+  UNIQUE INDEX `Tipo de ecosistema_UNIQUE` (`tipo_ecosisitema` ASC) VISIBLE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `bio`.`Animales`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `bio`.`Animales` (
+  `id_animales` INT NOT NULL AUTO_INCREMENT,
+  `nombre_cientifico` VARCHAR(100) NOT NULL,
+  `descripcion_general` VARCHAR(700) NULL,
+  `nombre_comun` VARCHAR(80) NOT NULL,
+  `reino` VARCHAR(45) NULL,
+  `filo` VARCHAR(45) NULL,
+  `clase` VARCHAR(45) NULL,
+  `orden` VARCHAR(45) NULL,
+  `genero` VARCHAR(45) NULL,
+  `Ecosistema_id_habitat` INT NOT NULL,
+  PRIMARY KEY (`id_animales`),
+  INDEX `fk_Animales_Ecosistema1_idx` (`Ecosistema_id_habitat` ASC) VISIBLE,
+  CONSTRAINT `fk_Animales_Ecosistema1`
+    FOREIGN KEY (`Ecosistema_id_habitat`)
+    REFERENCES `bio`.`Ecosistema` (`id_habitat`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `bio`.`sub grupos`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `bio`.`sub grupos` (
+  `Grupos pertenecientes` INT NOT NULL,
+  PRIMARY KEY (`Grupos pertenecientes`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `bio`.`Animales_has_Registro`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `bio`.`Animales_has_Registro` (
+  `animales_ecosistema_id_ecosistema` INT NOT NULL,
+  `Animales_id_animales` INT NOT NULL,
+  PRIMARY KEY (`animales_ecosistema_id_ecosistema`),
+  INDEX `fk_Animales_has_Registro_Animales1_idx` (`Animales_id_animales` ASC) VISIBLE,
+  CONSTRAINT `fk_Animales_has_Registro_Animales1`
+    FOREIGN KEY (`Animales_id_animales`)
+    REFERENCES `bio`.`Animales` (`id_animales`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `bio`.`Registro`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `bio`.`Registro` (
+  `id_registro` INT NOT NULL AUTO_INCREMENT,
+  `fecha` DATE NOT NULL,
+  `amenazas_directas` VARCHAR(100) NULL,
+  `alimentacion` VARCHAR(150) NULL,
+  `estado_peligro` VARCHAR(50) NULL,
+  `distribucion` VARCHAR(150) NULL,
+  `Animales_has_Registro_animales_ecosistema_id_ecosistema` INT NOT NULL,
+  PRIMARY KEY (`id_registro`),
+  INDEX `fk_Registro_Animales_has_Registro1_idx` (`Animales_has_Registro_animales_ecosistema_id_ecosistema` ASC) VISIBLE,
+  CONSTRAINT `fk_Registro_Animales_has_Registro1`
+    FOREIGN KEY (`Animales_has_Registro_animales_ecosistema_id_ecosistema`)
+    REFERENCES `bio`.`Animales_has_Registro` (`animales_ecosistema_id_ecosistema`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `bio`.`Registro_distribucion`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `bio`.`Registro_distribucion` (
+  `id_lugar` INT NOT NULL,
+  `lugar` VARCHAR(60) NULL,
+  `Registro_id_registro` INT NOT NULL,
+  PRIMARY KEY (`id_lugar`, `Registro_id_registro`),
+  INDEX `fk_Registro_distribucion_Registro1_idx` (`Registro_id_registro` ASC) VISIBLE,
+  CONSTRAINT `fk_Registro_distribucion_Registro1`
+    FOREIGN KEY (`Registro_id_registro`)
+    REFERENCES `bio`.`Registro` (`id_registro`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `bio`.`Grupos`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `bio`.`Grupos` (
+  `id_grupo_animal` INT NOT NULL AUTO_INCREMENT,
+  `nombre_grupo_animal` VARCHAR(80) NOT NULL,
+  `descripcion_general` VARCHAR(400) NULL,
+  `num_especies` VARCHAR(45) NULL,
+  `Animales_id_animales` INT NOT NULL,
+  `Animales_id_habitat` INT NOT NULL,
+  PRIMARY KEY (`id_grupo_animal`),
+  INDEX `fk_Grupos de animales_Animales1_idx` (`Animales_id_animales` ASC, `Animales_id_habitat` ASC) VISIBLE,
+  CONSTRAINT `fk_Grupos de animales_Animales1`
+    FOREIGN KEY (`Animales_id_animales`)
+    REFERENCES `bio`.`Animales` (`id_animales`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `bio`.`Habitats_grupo`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `bio`.`Habitats_grupo` (
+  `id_habitad_grupo` INT NOT NULL AUTO_INCREMENT,
+  `tipo_habitad` VARCHAR(35) NULL,
+  `habitad` VARCHAR(250) NULL,
+  `Grupos de animales_id_grupo_animal` INT NOT NULL,
+  PRIMARY KEY (`id_habitad_grupo`),
+  INDEX `fk_Habitas del grupo_Grupos de animales1_idx` (`Grupos de animales_id_grupo_animal` ASC) VISIBLE,
+  CONSTRAINT `fk_Habitas del grupo_Grupos de animales1`
+    FOREIGN KEY (`Grupos de animales_id_grupo_animal`)
+    REFERENCES `bio`.`Grupos` (`id_grupo_animal`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `bio`.`Subgrupo`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `bio`.`Subgrupo` (
+  `id_subgrupo` INT NOT NULL AUTO_INCREMENT,
+  `subgrupo_id_subgrupo` INT NOT NULL,
+  `Grupos de animales_id_grupo_animal` INT NOT NULL,
+  PRIMARY KEY (`id_subgrupo`, `subgrupo_id_subgrupo`),
+  INDEX `fk_Sub grupo_Sub grupo1_idx` (`subgrupo_id_subgrupo` ASC) VISIBLE,
+  INDEX `fk_Sub grupo_Grupos de animales1_idx` (`Grupos de animales_id_grupo_animal` ASC) VISIBLE,
+  CONSTRAINT `fk_Sub grupo_Sub grupo1`
+    FOREIGN KEY (`subgrupo_id_subgrupo`)
+    REFERENCES `bio`.`Subgrupo` (`id_subgrupo`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Sub grupo_Grupos de animales1`
+    FOREIGN KEY (`Grupos de animales_id_grupo_animal`)
+    REFERENCES `bio`.`Grupos` (`id_grupo_animal`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
